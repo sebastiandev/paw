@@ -14,6 +14,10 @@ URL = "https://promociones-aereas.com.ar"
 KEYWORDS = ['costa rica', 'panama', 'caribe']
 
 
+SMTP_AWS_USER = 'AKIAIG5B2URLQZ4UUKPQ'
+SMTP_AWS_SERVER = 'email-smtp.us-west-2.amazonaws.com'
+
+
 def send_email(msg):
     from_address = 'devsebas@gmail.com'
     recipient = ["superpacko@gmail.com", "grillo.svy@gmail.com"]
@@ -37,11 +41,13 @@ def send_email(msg):
     g = Generator(str_io, False)
     g.flatten(mime_msg)
 
-    s = smtplib.SMTP('smtp.gmail.com', 587)
+    #s = smtplib.SMTP('smtp.gmail.com', 587)
+    s = smtplib.SMTP(SMTP_AWS_SERVER, 587)
     s.ehlo()
     s.starttls()
     s.ehlo()
-    s.login("devsebas@gmail.com", os.getenv('GMAIL_PASS'))
+    #s.login("devsebas@gmail.com", os.getenv('GMAIL_PASS'))
+    s.login(SMTP_AWS_USER, os.getenv('SMTP_AWS_PASS'))
     s.sendmail("", recipient, str_io.getvalue())
 
 
