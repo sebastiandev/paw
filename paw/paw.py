@@ -30,7 +30,7 @@ def send_email(msg):
     mime_msg = MIMEMultipart('alternative')
     mime_msg['Subject'] = "%s" % Header(subject, 'utf-8')
     # Only descriptive part of recipient and sender shall be encoded, not the email address
-    mime_msg['From'] = "<%s>" % (Header(from_address[0], 'utf-8'))
+    mime_msg['From'] = "<%s>" % (Header(from_address, 'utf-8'))
     mime_msg['To'] = ','.join(["<{}>".format(Header(recip, 'utf-8'))  for recip in recipient])
 
     textpart = MIMEText(msg, 'plain', 'UTF-8')
