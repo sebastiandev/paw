@@ -1,5 +1,6 @@
 import multiprocessing
 import requests
+import os
 from lxml import html
 from emailer import Emailer
 from webpeeper import email_credentials
@@ -10,6 +11,10 @@ class Peeper(object):
     def __init__(self, *finders):
         self._finders = finders
         self._emailer = Emailer(*email_credentials())
+        self._findings_file_name = os.path.join(os.path.expanduser("~"), 'findings')
+
+        with open(self._findings_file_name, 'r') as f:
+            self._findings = set([e.strip().replace('\r', '').replace('\n', '') for e in f.readlines()])
 
     def _peep_url(self, finder):
         req = requests.get(finder.url)
@@ -17,18 +22,26 @@ class Peeper(object):
         findings = finder.find(tree)
 
         if findings:
-            msg = "{} with keywords {}".format(finder.name, ','.join(finder.keywords))
-            msg += "\r\n\r\n"
-
+            msg = ''
             for title, content, content_date, link in findings:
-                msg += "\r\n  - Link: {}\r\n    Date: {}\r\n    Title: {}\r\n    Post: {}\r\n""" \
-                    .format(link, content_date, title, content)
+                if link not in self._findings:
+                    self._findings.add(link)
+                    msg += "\r\n  - Link: {}\r\n    Date: {}\r\n    Title: {}\r\n    Post: {}\r\n""" \
+                        .format(link, content_date, title, content)
 
-            self._emailer.send('devsebas@gmail.com',
-                               ["superpacko@gmail.com", "grillo.svy@gmail.com"],
-                               ["superpacko@gmail.com"],
-                               'Promociones Aereas',
-                               msg)
+            if msg:
+                header = "{} with keywords {}".format(finder.name, ','.join(finder.keywords))
+                header += "\r\n\r\n"
+                header += msg
+
+                self._emailer.send('devsebas@gmail.com',
+                                   ["superpacko@gmail.com", "grillo.svy@gmail.com"],
+                                   'Promociones Aereas',
+                                   header)
+
+    def _store_findings(self):
+        with open(self._findings_file_name, 'w') as f:
+            f.write('\n'.join(self._findings))
 
     def peep(self):
         processes = []
@@ -45,6 +58,7 @@ class Peeper(object):
             for p in processes:
                 p.join()
 
+        self._store_findings()
 
 if __name__ == '__main__':
     import argparse
