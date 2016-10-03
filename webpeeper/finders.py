@@ -59,7 +59,7 @@ class PromocionesAereasFinder(Finder):
 
     name = "Promociones Aereas"
     url = "https://promociones-aereas.com.ar"
-    keywords = ['costa rica', 'panama', 'mexico', 'caribe']
+    keywords = ['costa rica', 'panama', 'mexico', 'caribe', 'venezuela', 'brasil']
 
     element_expr = '//article'
     title_expr = './/header/h2/a/text()'
